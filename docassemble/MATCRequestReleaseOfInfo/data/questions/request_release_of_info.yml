@@ -1,0 +1,451 @@
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+---
+metadata:
+  title: >-
+    Request Release of Info
+  short title: >-
+    Request Release of Info
+  description: |-
+    This interview helps someone in Massachusetts request a release of sealed information in eviction cases.
+  can_I_use_this_form: |
+    If you are a named party or representative of a named party in an eviction case, you can use this interview to request the release of sealed information.
+  before_you_start: |
+    This interview will help you request for Release of Information (Sealed Eviction Case).
+    
+    Before you get started, please gather:
+    
+    * Docket Number
+    * Court Department
+    * Court Division
+    * Name of parties
+    * Purpose of filing the form
+    * Attorney's contact information
+    * Attorney's Signature
+  maturity: production
+  estimated_completion_minutes: 10
+  estimated_completion_delta: 5
+  LIST_topics: 
+    - "GO-00-00-00-00"
+    - "GO-02-00-00-00"
+  tags:
+    - "GO-00-00-00-00"
+    - "GO-02-00-00-00"
+  authors:
+    - Grant-A-LIT
+  original_form:
+    - https://www.mass.gov/doc/request-for-release-of-information/download
+  original_form_published_on: ""
+  allowed_courts: 
+    - "Boston Municipal Court"
+    - "District Court"
+    - "Housing Court"
+  typical_role: "unknown"
+  al_weaver_version: "1.11.0"
+  generated_on: "2025-09-17"
+  languages:
+    - en
+  jurisdiction: NAM-US-US+MA
+  review_date: 2025-09-17
+  form_titles:
+    - Request Release of Info
+  form_numbers: []
+  update_notes: |
+---
+code: |
+  # This controls the default country and list of states in address field questions
+  AL_DEFAULT_COUNTRY = "US"
+---
+code: |
+  # This controls the default state in address field questions
+  AL_DEFAULT_STATE = "MA"
+---
+code: |
+  github_repo_name =  'docassemble-RequestReleaseOfInfo'
+---
+code: |
+  interview_short_title = "Request for Release of Information (Sealed Eviction Case)"
+---
+code: |
+  al_form_type = "existing_case" 
+---
+objects:
+  - users: ALPeopleList.using(there_are_any=True)
+  - other_parties: ALPeopleList.using(there_are_any=True)
+---
+sections:
+  - review_request_release_of_info: Review your answers
+---
+#################### Interview order #####################
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: interview_order_request_release_of_info
+code: |
+  # Set the allowed courts for this interview
+  allowed_courts = ['Boston Municipal Court', 'District Court', 'Housing Court']
+  nav.set_section("review_request_release_of_info")
+  # Below sets the user_role and user_ask_role by asking a question.
+  # You can set user_ask_role directly instead to either 'plaintiff' or 'defendant'
+  user_ask_role
+  Request_for_Release_of_Information
+  is_named_party
+  is_for_psejg
+  set_progress(14)
+  agency1
+  docket_number
+  trial_court.department
+  set_progress(28)
+  trial_court.division
+  defendants.gather()
+  plaintiffs.gather()
+  set_progress(42)
+  attorneys.gather()
+  attorneys[0].phone_number
+  attorneys[0].address.address
+  set_progress(56)
+  attorneys[0].mobile_number
+  attorneys[0].email
+  set_progress(70)
+  signature_date
+  interview_order_request_release_of_info = True
+---
+###################### Main order ######################
+comment: |
+  This block includes the logic for standalone interviews.
+  Delete mandatory: True to include in another interview
+mandatory: True
+code: |
+  al_intro_screen
+  request_release_of_info_intro
+  interview_order_request_release_of_info
+  signature_date
+  # Store anonymous data for analytics / statistics
+  store_variables_snapshot(
+      persistent=True,
+      data={
+          "zip": showifdef("users[0].address.zip"),
+          "reached_interview_end": True,
+      },
+  )
+  request_release_of_info_download
+---
+id: Request_Release_of_Info
+continue button field: request_release_of_info_intro
+question: |
+  Request Release of Info
+subquestion: |
+  This interview will help you request for Release of Information (Sealed Eviction Case).
+  
+  Before you get started, please gather:
+  
+  * Docket Number
+  * Court Department
+  * Court Division
+  * Name of parties
+  * Purpose of filing the form
+  * Attorney's contact information
+  * Attorney's Signature
+
+  If you are a named party or representative of a named party in an eviction case, you can use this interview to request the release of sealed information.
+
+  Most people take about 10 minutes to complete this interview.
+---
+id: Request for Release of Information
+question: |
+  Request for Release of Information
+continue button field: Request_for_Release_of_Information
+---
+id: Named party or representative
+question: |
+  Named party or representative
+subquestion: |
+  Are you a named party or representative?
+fields:
+  - "Is named party": is_named_party
+    datatype: yesno
+---
+id: Purpose of the Request
+question: |
+  Purpose of the Request
+fields:
+  - "Is for psejg": is_for_psejg
+    datatype: yesno
+  - "Psejg info block": psejg_info_block
+    maxlength: 44
+  - "Is for moneyjudgement": is_for_moneyjudgement
+    datatype: yesno
+  - "Moneyjudgment info block": moneyjudgment_info_block
+    maxlength: 76
+  - "Is for crim investigation": is_for_crim_investigation
+    datatype: yesno
+  - "Crim info block": crim_info_block
+    maxlength: 24
+---
+id: Representative Firm Information
+question: |
+  Representative Firm Information
+fields:
+  - "Agency1": agency1
+    maxlength: 24
+    required: False
+  - "Bar number": bar_number
+    maxlength: 34
+---
+id: preview request_release_of_info
+question: |
+  Preview your form before you sign it
+subquestion: |
+  Here is a preview of the form you will sign on the next page.   
+  
+  ${ al_court_bundle.as_pdf(key='preview') }
+
+  Click the image to open it in a new tab. Click the "Edit answers" button
+  to edit your answers.
+
+  ${ action_button_html(url_action('review_request_release_of_info'), label='Edit answers', color='info') }
+  
+  Remember to come back to this window to continue and sign your form.
+continue button field: request_release_of_info_preview_question    
+---
+code: |
+  signature_fields = ['attorneys[0].signature']
+---
+code: |
+  # This is a placeholder for the addresses that will be searched
+  # for matching address to court. Edit if court venue is based on 
+  # a different address than the user's
+  [user.address.address for user in users.complete_elements()]
+  addresses_to_search = [user.address for user in users.complete_elements()]
+---
+id: request release of info review screen
+event: review_request_release_of_info
+question: |
+  Review your answers
+review:
+  - Edit: docket_number
+    button: |
+      **Docket number**:
+      ${ docket_number }
+  - Edit: trial_court
+    button: |
+      **Trial court**
+  
+      % if defined("trial_court.department"):
+      * department: ${ trial_court.department }
+      % endif
+      % if defined("trial_court.division"):
+      * division: ${ trial_court.division }
+      % endif
+  - Edit: defendants.revisit
+    button: |
+      **Defendants**
+
+      % for item in defendants:
+        * ${ item }
+      % endfor
+  - Edit: plaintiffs.revisit
+    button: |
+      **Plaintiffs**
+
+      % for item in plaintiffs:
+        * ${ item }
+      % endfor
+  - Edit: attorneys.revisit
+    button: |
+      **Attorneys**
+
+      % for item in attorneys:
+        * ${ item }
+      % endfor
+  - Edit: agency1
+    button: |
+      **Agency1**:
+      ${ agency1 }
+  - Edit: is_named_party
+    button: |
+      **Is named party**:
+      ${ word(yesno(is_named_party)) }
+  - Edit: is_for_psejg
+    button: |
+      **Is for psejg**:
+      ${ word(yesno(is_for_psejg)) }
+  - Edit: psejg_info_block
+    button: |
+      **Psejg info block**:
+      ${ psejg_info_block }
+  - Edit: is_for_moneyjudgement
+    button: |
+      **Is for moneyjudgement**:
+      ${ word(yesno(is_for_moneyjudgement)) }
+  - Edit: moneyjudgment_info_block
+    button: |
+      **Moneyjudgment info block**:
+      ${ moneyjudgment_info_block }
+  - Edit: is_for_crim_investigation
+    button: |
+      **Is for crim investigation**:
+      ${ word(yesno(is_for_crim_investigation)) }
+  - Edit: crim_info_block
+    button: |
+      **Crim info block**:
+      ${ crim_info_block }
+  - Edit: bar_number
+    button: |
+      **Bar number**:
+      ${ bar_number }
+  - Edit: signature_date
+    button: |
+      **Date of signature**:
+      ${ signature_date }
+---
+continue button field: defendants.revisit
+question: |
+  Edit defendants
+subquestion: |
+  ${ defendants.table }
+
+  ${ defendants.add_action() }
+---
+table: defendants.table
+rows: defendants
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+edit:
+  - name.first
+confirm: True
+
+---
+continue button field: plaintiffs.revisit
+question: |
+  Edit plaintiffs
+subquestion: |
+  ${ plaintiffs.table }
+
+  ${ plaintiffs.add_action() }
+---
+table: plaintiffs.table
+rows: plaintiffs
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+edit:
+  - name.first
+confirm: True
+
+---
+continue button field: attorneys.revisit
+question: |
+  Edit attorneys
+subquestion: |
+  ${ attorneys.table }
+
+  ${ attorneys.add_action() }
+---
+table: attorneys.table
+rows: attorneys
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.city") else ""
+  - Mobile number: |
+      row_item.mobile_number if defined("row_item.mobile_number") else ""
+  - Email: |
+      row_item.email if defined("row_item.email") else ""
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+edit:
+  - name.first
+  - phone_number
+  - address.city
+  - mobile_number
+  - email
+  - signature
+confirm: True
+
+---
+id: download request_release_of_info
+event: request_release_of_info_download
+question: |
+  All done
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+  
+  View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
+
+  ${ action_button_html(url_action('review_request_release_of_info'), label='Edit answers', color='info') }
+  
+  
+  ${ al_user_bundle.download_list_html() }
+  
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+progress: 100
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - request_release_of_info_Post_interview_instructions: ALDocument.using(title="Instructions", filename="request_release_of_info_next_steps.docx", enabled=True, has_addendum=False)
+  - request_release_of_info_attachment: ALDocument.using(title="Request Release of Info", filename="request_release_of_info", enabled=True, has_addendum=False, )
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[request_release_of_info_Post_interview_instructions, request_release_of_info_attachment], filename="request_release_of_info", title="All forms to download for your records", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[request_release_of_info_attachment],  filename="request_release_of_info", title="All forms to deliver to court", enabled=True)
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
+# used for "preview" and "final" keys, and logic in the template checks the value of 
+# `i` to show or hide the user's signature
+attachment:
+  name: Post-interview-Instructions
+  filename: request_release_of_info_next_steps
+  docx template file: request_release_of_info_next_steps.docx
+  variable name: request_release_of_info_Post_interview_instructions[i]
+  skip undefined: True
+  tagged pdf: True
+---
+attachment:
+  name: request release of info
+  filename: request_release_of_info
+  variable name: request_release_of_info_attachment[i]
+  skip undefined: True
+  pdf template file: request_release_of_info.pdf
+  fields:
+      - "docket_number": ${ docket_number }
+      - "trial_court_department": ${ trial_court.department }
+      - "trial_court_division": ${ trial_court.division }
+      - "defendants": ${ defendants }
+      - "plaintiffs": ${ plaintiffs }
+      - "attorneys1_name_full": ${ attorneys[0] }
+      - "attorneys1_name_full__1": ${ attorneys[0] }
+      - "attorneys1_name_full__2": ${ attorneys[0] }
+      - "agency1": ${ agency1 }
+      - "agency1__1": ${ agency1 }
+      - "is_named_party": ${ is_named_party }
+      - "is_for_psejg": ${ is_for_psejg }
+      - "psejg_info_block": ${ psejg_info_block }
+      - "psejg_info_block__1": ${ psejg_info_block }
+      - "is_for_moneyjudgement": ${ is_for_moneyjudgement }
+      - "moneyjudgment_info_block": ${ moneyjudgment_info_block }
+      - "moneyjudgment_info_block__1": ${ moneyjudgment_info_block }
+      - "is_for_crim_investigation": ${ is_for_crim_investigation }
+      - "crim_info_block": ${ crim_info_block }
+      - "crim_info_block__1": ${ crim_info_block }
+      - "bar_number": ${ bar_number }
+      - "attorneys1_phone_number": ${ attorneys[0].phone_number }
+      - "attorneys1_address_unit": ${ attorneys[0].address.unit }
+      - "attorneys1_mobile_number": ${ attorneys[0].mobile_number }
+      - "attorneys1_address_address": ${ attorneys[0].address.address }
+      - "attorneys1_address_state": ${ attorneys[0].address.state }
+      - "attorneys1_address_zip": ${ attorneys[0].address.zip }
+      - "attorneys1_email": ${ attorneys[0].email }
+      - "attorneys1_address_city": ${ attorneys[0].address.city }
+      - "attorneys1_signature": ${ attorneys[0].signature_if_final(i) }
+      - "signature_date": ${ signature_date }
+
+
+
